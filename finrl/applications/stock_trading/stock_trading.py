@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import datetime
 import sys
 from finrl.meta.data_processors.func import date2str, str2date
-from finrl.meta.data_processors.func import calc_train_trade_starts_ends_during_trade
 from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
 from finrl.meta.preprocessor.preprocessors import FeatureEngineer, data_split
 from finrl.meta.env_stock_trading.env_stocktrading import StockTradingEnv
@@ -17,7 +16,7 @@ from finrl.agents.stablebaselines3.models import DRLAgent
 from stable_baselines3.common.logger import configure
 from finrl.meta.data_processor import DataProcessor
 
-from finrl.plot import backtest_stats, backtest_plot, get_daily_return, get_baseline
+from finrl.plot import backtest_stats, backtest_plot, get_daily_return, get_baseline, plot_return
 import itertools
 
 from finrl import config
@@ -39,13 +38,19 @@ from finrl.config import (
 )
 
 def main():
-    sys.path.append('../FinRL')
-    check_and_make_directories([DATA_SAVE_DIR, TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR, RESULTS_DIR])
-
     TRAIN_START_DATE = '2021-01-01'
     TRAIN_END_DATE = '2022-10-01'
-    TRADE_START_DATE = '2022-10-01'
-    TRADE_END_DATE = '2023-03-01'
+    TRADE_START_DATE = '2022-10-02'
+    TRADE_END_DATE = '2023-02-01'
+    if_using_a2c = True
+    if_using_ddpg = True
+    if_using_ppo = True
+    if_using_td3 = True
+    if_using_sac = True
+
+
+    sys.path.append('../FinRL')
+    check_and_make_directories([DATA_SAVE_DIR, TRAINED_MODEL_DIR, TENSORBOARD_LOG_DIR, RESULTS_DIR])
 
     df = YahooDownloader(start_date=TRAIN_START_DATE,
                          end_date=TRADE_END_DATE,
@@ -98,11 +103,7 @@ def main():
     env_train, _ = e_train_gym.get_sb_env()
     print(type(env_train))
 
-    if_using_a2c = True
-    if_using_ddpg = False
-    if_using_ppo = False
-    if_using_td3 = False
-    if_using_sac = False
+
 
     agent = DRLAgent(env=env_train)
     model_a2c = agent.get_model('a2c')
@@ -278,12 +279,23 @@ def main():
         if col != 'date' and result[col].tolist()[0] != env_kwargs['initial_amount']:
             result[col] = result[col] / result[col].tolist()[0] * env_kwargs['initial_amount']
 
-
+    result = result.reset_index(drop=True)
     print('result: ', result)
     result.to_csv('result.csv')
-    plt.rcParams['figure.figsize'] = (15, 5)
-    plt.figure()
-    result.plot()
+    # plt.rcParams['figure.figsize'] = (15, 5)
+    # plt.figure()
+    # result.plot()
+    # plot fig
+    plot_return(result=result, \
+                column_as_x='date', \
+                if_need_calc_return=True, \
+                savefig_filename='stock.png', \
+                xlabel='Date', \
+                ylabel='Return',
+                if_transfer_date=True,
+                num_days_xticks = 20,
+                )
+
 
 
 if __name__ == '__main__':
