@@ -82,30 +82,34 @@ def calc_dates(start_date: datetime.date,
 
 # init_train_dates: the init train_dates, but not separated to subsets, e.g.,'2010-01-01', ...'2021-10-01'
 # init_trade_dates: the trade_dates, but not separated to subsets
-# num_subsets_during_trade: the num of subsets that trade_dates splits.
-# return: train_starts, train_ends, trade_starts, trade_ends, which has the same length num_subsets_during_trade
-def calc_train_trade_starts_ends_during_trade(init_train_dates: List[str],
-                                              init_trade_dates: List[str],
-                                              num_subsets_during_trade: int):
+# num_days_if_rolling: the num of days in a subset if trade_dates splits.
+# return: train_starts, train_ends, trade_starts, trade_ends, which has the same length num_subsets_if_rolling
+# start is include, end is not include. If endIndex is len(dates), end is None
+def calc_train_trade_starts_ends_if_rolling(init_train_dates: List[str],
+                                            init_trade_dates: List[str],
+                                            trade_window_length2: int) \
+        -> Tuple[List[str], List[str], List[str], List[str]]:
     trade_dates_length = len(init_trade_dates)
     train_window_length = len(init_train_dates)
-    trade_window_length = int(np.ceil(trade_dates_length / num_subsets_during_trade))
+    trade_window_length = min(trade_window_length2, trade_dates_length)
+    num_subsets_if_rolling = int(np.ceil(trade_dates_length / trade_window_length))
+    print('num_subsets_if_rolling: ', num_subsets_if_rolling)
     dates = np.concatenate((init_train_dates, init_trade_dates), axis=0)
     train_starts = []
     train_ends = []
     trade_starts = []
     trade_ends = []
 
-    for i in range(num_subsets_during_trade):
+    for i in range(num_subsets_if_rolling):
         trade_start_index = train_window_length + i * trade_window_length
         trade_start = dates[trade_start_index]
         trade_starts.append(trade_start)
-        trade_end_index = min(trade_start_index + trade_window_length - 1, len(dates) - 1)
+        trade_end_index = min(trade_start_index + trade_window_length, len(dates) - 1)
         trade_end = dates[trade_end_index]
         trade_ends.append(trade_end)
         train_start = dates[trade_start_index - train_window_length]
         train_starts.append(train_start)
-        train_end = dates[trade_start_index - 1]
+        train_end = dates[trade_start_index]
         train_ends.append(train_end)
     print('train_starts: ', train_starts)
     print('train_ends__: ', train_ends)
