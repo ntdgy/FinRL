@@ -167,8 +167,8 @@ def plot_result(result: pd.DataFrame(),
     result.reindex()
 
     x = result[column_as_x].values.tolist()
-    plt.rcParams["figure.figsize"] = (15, 5)
-    plt.figure();
+    plt.rcParams["figure.figsize"] = (15, 6)
+    plt.figure()
 
     ax = plt.subplot(1, 1, 1)
     colors = ['black', 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'aliceblue', 'coral', 'darksalmon', 'firebrick', 'honeydew']
@@ -185,8 +185,8 @@ def plot_result(result: pd.DataFrame(),
     # set grid
     plt.grid()
 
-    plt.xticks(size=15)  # 设置刻度大小
-    plt.yticks(size=15)  # 设置刻度大小
+    # plt.xticks(size=15)  # 设置刻度大小
+    # plt.yticks(size=15)  # 设置刻度大小
 
     # #设置每隔多少距离⼀个刻度
     # plt.xticks(x[::60])
